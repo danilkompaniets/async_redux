@@ -1,48 +1,30 @@
-import { useDispatch, useSelector } from "react-redux";
-import {
-  selectAllPosts,
-  getPostsStatus,
-  getPostsError,
-  fetchPosts,
-} from "./postsSlice";
-import { useEffect } from "react";
+import { useSelector } from "react-redux";
+import { getPostsStatus, getPostsError, selectPostsIds } from "./postsSlice";
 import PostsExcerpt from "./PostsExcerpt";
 
 const PostsList = () => {
-  const dispatch = useDispatch();
-
-  const posts = useSelector(selectAllPosts);
+  const orderedPostsIds = useSelector(selectPostsIds);
   const postsStatus = useSelector(getPostsStatus);
   const error = useSelector(getPostsError);
 
-  useEffect(() => {
-    if (postsStatus === "idle") {
-      dispatch(fetchPosts());
-    }
-  }, [dispatch, postsStatus]);
+  console.log(orderedPostsIds)
 
   let content;
   if (postsStatus === "loading") {
     content = <p>Loading...</p>;
   } else if (postsStatus === "succeeded") {
-    const orderedPosts = posts
-      .slice()
-      .sort((a, b) => b.date.localeCompare(a.date));
-
-    console.log(orderedPosts);
-
-    content = orderedPosts.map((post) => (
-      <PostsExcerpt post={post} key={post.id} />
+    content = orderedPostsIds.map((postId) => (
+      <PostsExcerpt postId={postId} key={postId} />
     ));
   } else if (postsStatus === "failed") {
     content = <p>{error}</p>;
   }
 
-  return <div className="w-full flex items-center flex-col">
-    <div className="container mt-4">
-    {content}
+  return (
+    <div className="w-full flex items-center flex-col">
+      <div className="container mt-4">{content}</div>
     </div>
-  </div>;
+  );
 };
 
 export default PostsList;

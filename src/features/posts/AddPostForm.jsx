@@ -50,6 +50,7 @@ const AddPostForm = () => {
     try {
       if (canSave) {
         setAddRequestStatus("pending");
+        
         dispatch(
           addNewPost({
             title: state.title,
