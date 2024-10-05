@@ -38,12 +38,11 @@ const PostsList = () => {
     content = <p>{error}</p>;
   }
 
-  return (
-    <div>
-      <h2>Posts</h2>
-      {content}
+  return <div className="w-full flex items-center flex-col">
+    <div className="container mt-4">
+    {content}
     </div>
-  );
+  </div>;
 };
 
 export default PostsList;

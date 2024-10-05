@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 
 import { addNewPost } from "./postsSlice";
 import { selectAllUsers } from "../users/usersSlice";
+import { useNavigate } from "react-router-dom";
 
 const reducer = (state, action) => {
   switch (action.type) {
@@ -30,6 +31,7 @@ const reducer = (state, action) => {
   }
 };
 const AddPostForm = () => {
+  const navigate = useNavigate();
   const dispatch = useDispatch();
   const users = useSelector(selectAllUsers);
 
@@ -55,6 +57,8 @@ const AddPostForm = () => {
             userId: state.userId,
           })
         ).unwrap();
+
+        navigate("/");
       }
     } catch (e) {
       console.log("failed to save the post: " + e);
