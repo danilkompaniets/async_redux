@@ -1,20 +1,14 @@
 import { useSelector } from "react-redux";
 import ReactionButtons from "./ReactionButtons";
 import TimeAgo from "./TimeAgo";
-import { selectAllUsers } from "../users/usersSlice";
 import { Link } from "react-router-dom";
 import { selectPostById } from "./postsSlice";
+import { selectUsersById, useGetUsersQuery } from "../users/usersSlice";
 
 const PostsExcerpt = ({ postId }) => {
-  const users = useSelector(selectAllUsers);
-  // +
   const post = useSelector((state) => selectPostById(state, postId));
 
-  let author = users.find((user) => user.id == post.userId);
-
-  if (!author) {
-    author = "Unknown author";
-  }
+  const author = useSelector((state) => selectUsersById(state, post.userId));
 
   return (
     <article className="px-4 py-2 flex flex-col border text-black border-neutral-500 rounded-md mb-5 gap-y-3">

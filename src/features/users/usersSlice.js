@@ -1,39 +1,38 @@
-import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import axios from "axios";
+import { createEntityAdapter, createSelector } from "@reduxjs/toolkit";
+import { apiSlice } from "../api/apiSlice";
 
-const USERS_URL = "https://jsonplaceholder.typicode.com/users";
-
-const initialState = {
-  users: [],
-  status: "idle",
-  error: null,
-};
-
-export const fetchUsers = createAsyncThunk("users/fetchUsers", async () => {
-  const response = await axios.get(USERS_URL);
-  return response.data;
+const usersAdapter = createEntityAdapter({
+  sortComparer: (a, b) => b.id.localeCompare(a.id),
 });
 
-const usersSlice = createSlice({
-  name: "users",
-  initialState,
-  reducers: {},
-  extraReducers: (builder) =>
-    builder
-      .addCase(fetchUsers.pending, (state) => {
-        state.status = "loading";
-      })
-      .addCase(fetchUsers.fulfilled, (state, action) => {
-        state.status = "succeeded";
-        state.users = state.users.concat(action.payload);
-      })
-      .addCase(fetchUsers.rejected, (state, action) => {
-        state.status = "failed";
-        state.error = action.error.message;
-      }),
+const initialState = usersAdapter.getInitialState();
+
+export const usersApiSlice = apiSlice.injectEndpoints({
+  endpoints: (builder) => ({
+    getUsers: builder.query({
+      query: () => "/users",
+      transformResponse: (data) => usersAdapter.setAll(initialState, data),
+      providesTags: (result, error, arg) => [
+        { type: "User", id: "LIST" },
+        ...result.ids.map((id) => ({ type: "User", id: id })),
+      ],
+    }),
+  }),
 });
 
-export const selectAllUsers = (state) => state.users.users;
-export const selectUserById = (state, userId) =>
-  state.users.users.find((user) => user.id == Number(userId));
-export default usersSlice.reducer;
+export const { useGetUsersQuery } = usersApiSlice;
+
+export const selectUsersResult = usersApiSlice.endpoints.getUsers.select();
+
+const selectUsersData = createSelector(
+  selectUsersResult,
+  (usersResult) => usersResult.data
+);
+
+export const { selectAll: selectAllUsers, selectById: selectUsersById } =
+  usersAdapter.getSelectors((state) => selectUsersData(state) ?? initialState);
+
+// export const selectAllUsers = (state) => state.users.users;
+// export const selectUserById = (state, userId) =>
+//   state.users.users.find((user) => user.id == Number(userId));
+// export default usersSlice.reducer;
