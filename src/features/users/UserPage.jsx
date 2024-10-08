@@ -1,34 +1,33 @@
-import React from "react";
-import { useSelector } from "react-redux";
 import { Link, useParams } from "react-router-dom";
-import { selectUserById } from "./usersSlice";
-import { selectAllPosts, selectPostsByUser } from "../posts/postsSlice";
+
+import { useGetPostsByUserIdQuery } from "../posts/postsSlice";
 
 const UserPage = () => {
   const { userId } = useParams();
+  const {
+    data: postsForUser,
+    isLoading,
+    isSuccess,
+    isError,
+    error,
+  } = useGetPostsByUserIdQuery(userId);
 
-  const user = useSelector((state) => selectUserById(state, Number(userId)));
+  let content;
 
-  const postsForUser = useSelector((state) => {
-    selectPostsByUser(state, Number(userId));
-  });
+  if (isLoading) {
+    content = <div>Loading...</div>;
+  } else if (isSuccess) {
+    const { entities, ids } = postsForUser;
+    content = ids.map((id) => (
+      <li key={id}>
+        <Link to={`/post/${id}`}>{entities[id].title}</Link>
+      </li>
+    ));
+  } else if (isError) {
+    content = error;
+  }
 
-  console.log(postsForUser)
-
-  console.log(postsForUser);
-
-  const postTitles = postsForUser.map((post) => (
-    <li key={post.id}>
-      <Link to={`/post/${post.id}`}>{post.title}</Link>
-    </li>
-  ));
-
-  return (
-    <div>
-      <h2>{user.name}</h2>
-      {postTitles}
-    </div>
-  );
+  return <div>{content}</div>;
 };
 
 export default UserPage;

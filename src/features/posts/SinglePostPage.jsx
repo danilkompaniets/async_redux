@@ -1,25 +1,21 @@
-import React from "react";
 import { useSelector } from "react-redux";
 import { selectPostById } from "./postsSlice";
 import TimeAgo from "./TimeAgo";
 import ReactionButtons from "./ReactionButtons";
 import { useParams } from "react-router-dom";
 import { Link } from "react-router-dom";
-import { selectAllUsers } from "../users/usersSlice";
-import PostsExcerpt from "./PostsExcerpt";
+import { selectUsersById } from "../users/usersSlice";
 
 const SinglePostPage = () => {
   const { postId } = useParams();
+  const post = useSelector((state) => selectPostById(state, postId));
+  const userId = post.userId;
 
-  const users = useSelector(selectAllUsers);
-
-  const post = useSelector((state) => selectPostById(state, Number(postId)));
+  const author = useSelector((state) => selectUsersById(state, userId));
 
   if (!post) {
     return <section>Post not found...</section>;
   }
-
-  let author = users.find((user) => user.id == post.userId);
 
   return (
     <div className="h-screen flex justify-center items-center">

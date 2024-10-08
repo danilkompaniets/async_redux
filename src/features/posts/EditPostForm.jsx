@@ -1,8 +1,10 @@
-import { useReducer, useState } from "react";
+import { useReducer } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { deletePost, selectPostById, updatePost } from "./postsSlice";
-import { useDispatch, useSelector } from "react-redux";
-import { selectAllUsers } from "../users/usersSlice";
+import { selectPostById } from "./postsSlice";
+import { useSelector } from "react-redux";
+
+import { useDeletePostMutation, useUpdatePostMutation } from "./postsSlice";
+import { selectAllUsers, useGetUsersQuery } from "../users/usersSlice";
 
 const reducer = (state, action) => {
   switch (action.type) {
@@ -31,14 +33,14 @@ const reducer = (state, action) => {
 
 const EditPostForm = () => {
   const { postId } = useParams();
-  console.log(postId);
+
+  const [updatePost, { isLoading }] = useUpdatePostMutation({ postId });
+  const [deletePost] = useDeletePostMutation();
+
   const post = useSelector((state) => selectPostById(state, postId));
 
   const navigate = useNavigate();
-  const dispatch = useDispatch();
   const users = useSelector(selectAllUsers);
-
-  const [updateRequestStatus, setUpdateRequestStatus] = useState("idle");
   const [state, dispatchForm] = useReducer(reducer, {
     title: post.title,
     body: post.body,
@@ -57,33 +59,27 @@ const EditPostForm = () => {
     return <div>Not Found...</div>;
   }
 
-  const canSave =
-    state.body && state.title && state.userId && updateRequestStatus === "idle";
+  const canSave = state.body && state.title && state.userId && !isLoading;
 
   const onSavePostClicked = async () => {
     try {
-      console.log(state);
       if (canSave) {
-        setUpdateRequestStatus("pending");
-        await dispatch(updatePost({ state })).unwrap();
+        await updatePost({ state }).unwrap();
+
         navigate(`/post/${postId}`);
       }
     } catch (e) {
       console.log("failed to save the post: " + e);
-    } finally {
-      setUpdateRequestStatus("idle");
     }
   };
 
   const onDeletePostClicked = async () => {
     try {
-      setUpdateRequestStatus("pending");
-      dispatch(deletePost({ id: state.id })).unwrap();
+      deletePost(state.id);
+
       navigate("/");
     } catch (error) {
       console.log(error);
-    } finally {
-      setUpdateRequestStatus("idle");
     }
   };
 

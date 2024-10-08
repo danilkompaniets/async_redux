@@ -7,7 +7,7 @@ import EditPostForm from "./features/posts/EditPostForm";
 import UserPage from "./features/users/UserPage";
 import UsersList from "./features/users/UsersList";
 
-function App() {  
+function App() {
   return (
     <Routes>
       <Route path="/" element={<Layout />}>
